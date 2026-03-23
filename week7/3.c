@@ -9,7 +9,9 @@ void kill_all_panic(pid_t *arr, size_t size) {
     for (int i = 0; i < size; i++) {
         kill(arr[i], SIGKILL);
     }
-
+    for (int i = 0; i < size; i++) {
+        wait(NULL);
+    }
     exit(1);
 }
 
