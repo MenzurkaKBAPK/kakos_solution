@@ -5,15 +5,15 @@
 #include <signal.h>
 #include <stdio.h>
 
-volatile sig_atomic_t flag;
-void handler(int s) { flag = 1; }
+volatile sig_atomic_t accumulated;
+void handle_timer(int s) { accumulated = 1; }
 
 #define RESTART_COUNT 5 - 1
 int main() {
 
     sigset_t before;
     sigset_t after;
-    struct sigaction config = {.sa_handler = handler, .sa_flags = SA_RESTART};
+    struct sigaction config = {.sa_handler = handle_timer, .sa_flags = SA_RESTART};
     sigaction(SIGUSR1, &config, NULL);
 
     sigemptyset(&before);
@@ -28,10 +28,10 @@ int main() {
     int restart_count = RESTART_COUNT;
     int sig_number = 0;
     while (restart_count != 0) {
-        while (!flag) {
+        while (!accumulated) {
             sigsuspend(&after);
         }
-        flag = 0;
+        accumulated = 0;
         printf("%d\n", sig_number);
         fflush(stdout);
         sig_number++;
